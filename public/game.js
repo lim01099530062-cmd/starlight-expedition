@@ -118,7 +118,7 @@ function drawLeoIllustration(x,y,t){
 
 // v12: illustration-frame animation for owned, equipped companions and pets.
 const unitAssetKeys={'루나':'luna','카인':'kain','미아':'mia','엘린':'elin','솔':'sol','노아':'noah','별토끼':'rabbit','작은 용':'dragon','숲여우':'fox','달고양이':'mooncat','눈부엉이':'owl','햇살새':'sunbird'};
-const unitFrames=Object.fromEntries(Object.entries(unitAssetKeys).map(([name,key])=>[name,Array.from({length:8},(_,i)=>{const img=new Image();img.src='/units/'+key+'_'+String(i+1).padStart(2,'0')+'.png?v=12';return img;})]));
+const unitFrames=Object.fromEntries(Object.entries(unitAssetKeys).map(([name,key])=>[name,Array.from({length:8},(_,i)=>{const img=new Image();img.src='/unit/'+key+'_'+String(i+1).padStart(2,'0')+'.png?v=12';return img;})]));
 function drawUnitIllustration(name,x,y,t,scale=1){
  const frames=unitFrames[name];if(!frames)return;
  const elapsed=t-attackAnim;
