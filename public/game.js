@@ -66,3 +66,6 @@ function scene(t){
 }
 function loop(t){const dt=Math.min(50,t-(lastTick||t));lastTick=t;if(state){update(dt,t);scene(t)}requestAnimationFrame(loop)}
 bind();fetch('/api/me').then(async r=>{if(r.ok){const d=await r.json();start(d.name,d.game)}}).catch(()=>{$('authMsg').textContent='서버에 연결할 수 없습니다.'});
+
+// v8 login audio controls: browser audio starts only after a user gesture.
+(()=>{let bgm=true,sfx=true;const b=document.getElementById('loginBgm'),s=document.getElementById('loginSfx');if(b)b.addEventListener('click',()=>{bgm=!bgm;b.textContent=bgm?'♫ BGM On':'♫ BGM Off';if(bgm){try{startMusic()}catch(e){}}});if(s)s.addEventListener('click',()=>{sfx=!sfx;s.textContent=sfx?'◖)) 효과음 On':'◖)) 효과음 Off';sound=sfx;});})();

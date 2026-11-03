@@ -96,3 +96,23 @@ button.ghost{background:linear-gradient(#33465b,#203249);border-color:#74869b;co
  #auth .login-art img{object-position:50% center!important}
  #auth .auth-card{margin:clamp(58px,13vh,140px) auto 0!important;}
 }
+
+/* v8: Interactive fields overlay the ORIGINAL artwork's printed mock form. */
+#auth.auth:not([hidden]){display:block!important;position:relative!important;overflow:hidden!important;width:100vw!important;height:100svh!important;min-height:100svh!important;padding:0!important;margin:0!important;background:#08132d!important}
+#auth .login-stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:max(100vw,177.683svh);aspect-ratio:1672/941;max-width:none!important;max-height:none!important;overflow:visible;isolation:isolate}
+#auth .login-background{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;filter:none}
+#auth .auth-overlay{position:absolute;inset:0;z-index:2;pointer-events:none;margin:0;padding:0}
+#auth .auth-overlay input,#auth .auth-overlay button{pointer-events:auto;position:absolute;display:block;margin:0!important;box-sizing:border-box;font-family:system-ui,'Noto Sans KR',sans-serif}
+#auth .auth-overlay input{left:39.75%;width:19.5%;height:5.85%;border:1px solid #a68b70;border-radius:9px;background:#fff0da!important;color:#302c37!important;padding:0 3.1%;font-size:clamp(13px,2.6svh,21px)!important;min-height:0!important;box-shadow:inset 0 1px 4px #5e4c3d30}
+#auth .auth-overlay input::placeholder{color:#766d69;opacity:1}
+#auth #username{top:42.8%}
+#auth #password{top:50.1%}
+#auth .auth-overlay button{left:39.8%;width:19.55%;height:7.5%;border:2px solid #f7d68d;border-radius:12px;color:white;font-size:clamp(13px,2.8svh,24px)!important;font-weight:900;min-height:0!important;text-shadow:0 1px 3px #0009}
+#auth #login{top:59.0%;background:linear-gradient(180deg,#a951ff,#650db3 55%,#40107c)!important;box-shadow:0 0 12px #e2a2ff90,inset 0 0 0 2px #b87aff}
+#auth #register{top:69.5%;background:linear-gradient(180deg,#79c4fa,#2378cb 55%,#18529d)!important;box-shadow:0 0 12px #84bfff90,inset 0 0 0 2px #a1d8ff}
+#auth #authMsg{position:absolute;left:39.5%;top:80%;width:20%;max-height:12%;overflow:auto;margin:0!important;padding:4px 8px;background:#142149df;border-radius:6px;color:#ffe3c4!important;font-size:clamp(10px,1.8svh,15px);text-align:center;pointer-events:none}
+#auth #authMsg:empty{display:none!important}
+#auth .auth-audio{position:absolute;z-index:3;right:1.6%;bottom:10.7%;display:flex;gap:1.2%;width:25%;justify-content:space-between}
+#auth .auth-audio button{flex:1;padding:6px 3px;border:2px solid #efbe6d;border-radius:10px;background:linear-gradient(#204a8d,#122d66);color:#fff4d7;white-space:nowrap;font-size:clamp(11px,2.2svh,18px);min-height:0}
+#auth .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#auth[hidden],#app[hidden],[hidden]{display:none!important;visibility:hidden!important}
