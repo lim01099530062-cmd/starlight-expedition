@@ -28,3 +28,9 @@ button.ghost{background:linear-gradient(#33465b,#203249);border-color:#74869b;co
 .auth-card input{background:#0c1939df;border:1px solid #d2ac6e;color:#fff;min-height:50px}
 .auth-card button{min-height:48px}
 @media(max-width:760px){.auth{background-position:42% center}.auth-card{margin:20px 0;padding:27px 19px}}
+
+/* v5: actual interactive login elements over selected fantasy artwork */
+.auth{background-image:linear-gradient(90deg,#07152970,#07152960),url('/login_art.png');background-position:center center;background-size:cover}
+.auth-card{position:relative;z-index:1;max-width:420px;background:#101b39f5;border:2px solid #e6c278}
+#scene{background:#78bd98}
+@media(max-width:760px){.auth{background-position:47% center}.auth-card{background:#101b39f5}}
