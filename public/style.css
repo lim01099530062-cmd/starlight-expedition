@@ -52,7 +52,10 @@ button.ghost{background:linear-gradient(#33465b,#203249);border-color:#74869b;co
 #auth .login-art img{width:100%;height:auto;object-fit:contain}
 #auth .auth-card{position:relative;flex:none}
 @media(max-width:760px){
- #auth.auth{display:flex!important;flex-direction:column;min-height:100svh;padding:0 0 30px}
+ #auth.auth{display:flex;flex-direction:column;min-height:100svh;padding:0 0 30px}
  #auth .login-art{width:100%;margin:0;flex:none}
  #auth .auth-card{width:calc(100% - 24px);margin:10px 12px 22px;min-height:auto;padding:18px 15px}
 }
+
+/* v6.2: authenticated view must never show the login layer */
+#auth[hidden],#app[hidden],[hidden]{display:none!important;visibility:hidden!important}
