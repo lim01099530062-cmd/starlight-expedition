@@ -89,6 +89,32 @@ function drawLeo(x,y,scale,t){
  ctx.restore();
 }
 
+
+// LEO v11: illustration-based eight-frame sword animation.
+const leoFrames=Array.from({length:8},(_,i)=>{
+ const img=new Image();img.src='/leo/leo_'+String(i+1).padStart(2,'0')+'.png?v=11';return img;
+});
+function drawLeoIllustration(x,y,t){
+ const elapsed=t-attackAnim;
+ // 0 idle, 1-6 sword slash, 7 return; gameplay damage timing unchanged.
+ let frame=0;
+ if(elapsed>=0&&elapsed<490){
+  const bounds=[65,125,185,240,310,390,450,490];
+  frame=bounds.findIndex(end=>elapsed<end);
+  if(frame<0)frame=7;
+ }
+ const img=leoFrames[frame];
+ if(!img.complete||!img.naturalWidth){drawLeo(x,y,1.12,t);return;}
+ const w=275,h=w*img.naturalHeight/img.naturalWidth;
+ const moving=elapsed>=0&&elapsed<490;
+ const dash=moving?20*Math.sin(Math.PI*elapsed/490):0;
+ const bob=moving?0:Math.sin(t/230)*2;
+ ctx.save();ctx.translate(x+dash,y+bob);
+ // Feet stay on the ground across all animation frames.
+ ctx.drawImage(img,-w*.5,-h,w,h);
+ ctx.restore();
+}
+
 function scene(t){
  const w=960,h=450;
  if(forestReady){ctx.drawImage(forestBackground,0,0,w,h)}else{const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#65c5ad');g.addColorStop(1,'#1a4b6c');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
@@ -97,7 +123,7 @@ function scene(t){
  const attacking=performance.now()-attackAnim<230;
  drawSprite('healer',130,260,.86,t,2);
  drawSprite('mage',280,350,1.05,t,1);
- drawLeo(455,367,1.12,t);
+ drawLeoIllustration(455,367,t);
  drawSprite('swordswoman',575,338,.72,t,3);
  if(enemy){ctx.save();ctx.translate(775,300+Math.sin(t/240)*8);ctx.fillStyle=enemy.boss?'#c679dd':'#83df80';ctx.beginPath();ctx.moveTo(-83,39);ctx.bezierCurveTo(-95,-45,-45,-98,0,-77);ctx.bezierCurveTo(59,-113,99,-34,81,39);ctx.quadraticCurveTo(0,99,-83,39);ctx.fill();ctx.strokeStyle='#3b6951';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#1c3b42';ctx.beginPath();ctx.ellipse(-25,-5,7,10,0,0,Math.PI*2);ctx.ellipse(25,-5,7,10,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(0,15,13,0,Math.PI);ctx.stroke();ctx.restore()}
  const since=performance.now()-attackAnim;if(since<270){ctx.save();ctx.globalAlpha=1-since/270;ctx.strokeStyle='#fff7ae';ctx.shadowColor='#ffe15d';ctx.shadowBlur=30;ctx.lineWidth=12;ctx.beginPath();ctx.arc(620,250,145,-1.1,.55);ctx.stroke();ctx.strokeStyle='#b9faff';ctx.lineWidth=4;ctx.stroke();ctx.restore()}
