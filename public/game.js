@@ -46,6 +46,49 @@ const embeddedCharacters={'knight':'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaH
 const spriteNames=['knight','mage','healer','swordswoman'];
 const sprites=Object.fromEntries(spriteNames.map(n=>{const img=new Image();img.src=embeddedCharacters[n];return [n,img]}));
 function drawSprite(name,x,y,scale,t,phase=0,attack=false){const img=sprites[name];if(!img?.complete||!img.naturalWidth){ctx.save();ctx.translate(x,y);ctx.scale(scale*.72,scale*.72);hero(0,-60,t);ctx.restore();return;}const bounce=Math.sin(t/220+phase)*4;const dash=attack?Math.sin(Math.min(1,(performance.now()-attackAnim)/220)*Math.PI)*35:0;ctx.save();ctx.translate(x+dash,y+bounce);ctx.rotate(Math.sin(t/450+phase)*.018);ctx.drawImage(img,-90*scale,-195*scale,190*scale,225*scale);ctx.restore()}
+
+// LEO v10: independently animated goggles, scarf, arm, sword and slash trail.
+function drawLeo(x,y,scale,t){
+ const age=t-attackAnim,active=age>=0&&age<440,p=active?age/440:0;
+ const smooth=q=>q*q*(3-2*q),clamp=q=>Math.max(0,Math.min(1,q));
+ const wind=active?smooth(clamp(p/.26)):0,cut=active?smooth(clamp((p-.26)/.42)):0,returning=active?smooth(clamp((p-.68)/.32)):0;
+ const arm=-.75-1.2*wind+2.8*cut-.85*returning;
+ const bounce=active?0:Math.sin(t/260)*2.5;
+ ctx.save();ctx.translate(x+(active?34*Math.sin(Math.PI*p):0),y+bounce);ctx.scale(scale,scale);
+ const shape=(draw,fill,stroke='#594050')=>{ctx.beginPath();draw();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2.6;ctx.stroke()}};
+ ctx.fillStyle='rgba(16,29,44,.32)';ctx.beginPath();ctx.ellipse(0,0,48,9,0,0,7);ctx.fill();
+ ctx.translate(0,-9);ctx.rotate(active?-.13*wind+.23*cut-.1*returning:Math.sin(t/550)*.013);
+ // Boots and leg pivots
+ for(const side of [-1,1]){ctx.save();ctx.translate(side*16,-43);ctx.rotate(side*(active?.17*Math.sin(Math.PI*p):Math.sin(t/280)*.025));shape(()=>ctx.roundRect(-11,0,22,39,7),'#26374d');shape(()=>ctx.roundRect(-15,30,31,15,6),'#624536');ctx.fillStyle='#c89d57';ctx.fillRect(-10,26,20,4);ctx.restore()}
+ // Coat and belt
+ shape(()=>{ctx.moveTo(-29,-103);ctx.lineTo(-38,-40);ctx.lineTo(-8,-49);ctx.lineTo(13,-47);ctx.lineTo(36,-39);ctx.lineTo(28,-104);ctx.closePath()},'#f3e8d0');
+ shape(()=>ctx.roundRect(-30,-111,60,70,15),'#8d603b');
+ shape(()=>{ctx.moveTo(-26,-108);ctx.lineTo(-9,-111);ctx.lineTo(22,-51);ctx.lineTo(10,-47);ctx.closePath()},'#f3e9ce');
+ ctx.fillStyle='#493738';ctx.fillRect(-30,-60,60,9);ctx.fillStyle='#e9c275';ctx.fillRect(-5,-63,12,13);
+ // Scarf tails with secondary motion
+ const wave=Math.sin(t/140)*5+(active?11*Math.sin(Math.PI*p):0);
+ shape(()=>{ctx.moveTo(-23,-116);ctx.quadraticCurveTo(-53,-137-wave,-76,-115-wave);ctx.lineTo(-62,-101-wave);ctx.quadraticCurveTo(-45,-113-wave,-20,-103);ctx.closePath()},'#d43742','#9b2733');
+ shape(()=>{ctx.moveTo(-16,-116);ctx.quadraticCurveTo(-50,-111-wave,-61,-94-wave);ctx.lineTo(-51,-87-wave);ctx.quadraticCurveTo(-33,-103,-11,-102);ctx.closePath()},'#ef4b4b','#a52b35');
+ // Rear arm
+ ctx.save();ctx.translate(-27,-102);ctx.rotate(-.25+Math.sin(t/320)*.04);shape(()=>ctx.roundRect(-11,0,22,42,8),'#f6e9d3');shape(()=>ctx.roundRect(-12,25,24,20,7),'#51474d');ctx.restore();
+ // Face, hair and goggles
+ shape(()=>ctx.ellipse(0,-147,39,38,0,0,7),'#ffdbb7');
+ shape(()=>{ctx.moveTo(-38,-154);ctx.lineTo(-42,-184);ctx.lineTo(-26,-178);ctx.lineTo(-13,-197);ctx.lineTo(1,-183);ctx.lineTo(17,-196);ctx.lineTo(26,-178);ctx.lineTo(41,-180);ctx.lineTo(36,-149);ctx.lineTo(22,-166);ctx.lineTo(7,-158);ctx.lineTo(-8,-169);ctx.lineTo(-27,-153);ctx.closePath()},'#77452e');
+ for(const xx of [-14,14]){ctx.fillStyle='#2379c9';ctx.beginPath();ctx.ellipse(xx,-143,6,9,0,0,7);ctx.fill();ctx.fillStyle='white';ctx.fillRect(xx-2,-149,3,4)}
+ ctx.strokeStyle='#ae6156';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-127,7,.2,Math.PI-.2);ctx.stroke();
+ ctx.strokeStyle='#c89b5a';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-35,-183);ctx.lineTo(35,-183);ctx.stroke();
+ for(const gx of [-16,17]){shape(()=>ctx.ellipse(gx,-185,16,12,-.1,0,7),'#d6a55b');shape(()=>ctx.ellipse(gx,-185,11,8,-.1,0,7),'#74d0f4','#386f9e');ctx.fillStyle='white';ctx.fillRect(gx-6,-190,5,3)}
+ shape(()=>{ctx.moveTo(-29,-115);ctx.quadraticCurveTo(0,-101,29,-116);ctx.lineTo(19,-125);ctx.quadraticCurveTo(0,-116,-23,-127);ctx.closePath()},'#d73342');
+ // Weapon arm and sword use an independent joint.
+ ctx.save();ctx.translate(27,-102);ctx.rotate(arm);
+ shape(()=>ctx.roundRect(-10,0,22,42,8),'#f6e9d0');shape(()=>ctx.roundRect(-12,25,25,23,7),'#50484e');shape(()=>ctx.roundRect(-8,40,18,16,7),'#ffcdab');
+ ctx.translate(1,47);ctx.fillStyle='#e8b45c';ctx.fillRect(-17,-4,34,8);
+ shape(()=>{ctx.moveTo(-5,-6);ctx.lineTo(-10,-93);ctx.lineTo(0,-116);ctx.lineTo(10,-93);ctx.lineTo(5,-6);ctx.closePath()},'#ccefff','#539dc6');
+ ctx.fillStyle='rgba(255,255,255,.9)';ctx.fillRect(-2,-91,4,72);ctx.fillStyle='#b98b4b';ctx.fillRect(-5,1,10,20);ctx.restore();
+ if(active&&p>.32&&p<.84){const alpha=Math.sin(Math.PI*(p-.32)/.52);ctx.save();ctx.globalAlpha=alpha;ctx.lineCap='round';ctx.shadowColor='#3cc9ff';ctx.shadowBlur=22;ctx.strokeStyle='#d4ffff';ctx.lineWidth=13;ctx.beginPath();ctx.arc(22,-109,110,-1.14,1.02);ctx.stroke();ctx.strokeStyle='#42bfff';ctx.lineWidth=5;ctx.beginPath();ctx.arc(22,-109,122,-1.2,1.06);ctx.stroke();ctx.restore()}
+ ctx.restore();
+}
+
 function scene(t){
  const w=960,h=450;
  if(forestReady){ctx.drawImage(forestBackground,0,0,w,h)}else{const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#65c5ad');g.addColorStop(1,'#1a4b6c');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
@@ -54,7 +97,7 @@ function scene(t){
  const attacking=performance.now()-attackAnim<230;
  drawSprite('healer',130,260,.86,t,2);
  drawSprite('mage',280,350,1.05,t,1);
- drawSprite('knight',455,367,1.12,t,0,attacking);
+ drawLeo(455,367,1.12,t);
  drawSprite('swordswoman',575,338,.72,t,3);
  if(enemy){ctx.save();ctx.translate(775,300+Math.sin(t/240)*8);ctx.fillStyle=enemy.boss?'#c679dd':'#83df80';ctx.beginPath();ctx.moveTo(-83,39);ctx.bezierCurveTo(-95,-45,-45,-98,0,-77);ctx.bezierCurveTo(59,-113,99,-34,81,39);ctx.quadraticCurveTo(0,99,-83,39);ctx.fill();ctx.strokeStyle='#3b6951';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#1c3b42';ctx.beginPath();ctx.ellipse(-25,-5,7,10,0,0,Math.PI*2);ctx.ellipse(25,-5,7,10,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(0,15,13,0,Math.PI);ctx.stroke();ctx.restore()}
  const since=performance.now()-attackAnim;if(since<270){ctx.save();ctx.globalAlpha=1-since/270;ctx.strokeStyle='#fff7ae';ctx.shadowColor='#ffe15d';ctx.shadowBlur=30;ctx.lineWidth=12;ctx.beginPath();ctx.arc(620,250,145,-1.1,.55);ctx.stroke();ctx.strokeStyle='#b9faff';ctx.lineWidth=4;ctx.stroke();ctx.restore()}
