@@ -115,16 +115,34 @@ function drawLeoIllustration(x,y,t){
  ctx.restore();
 }
 
+
+// v12: illustration-frame animation for owned, equipped companions and pets.
+const unitAssetKeys={'루나':'luna','카인':'kain','미아':'mia','엘린':'elin','솔':'sol','노아':'noah','별토끼':'rabbit','작은 용':'dragon','숲여우':'fox','달고양이':'mooncat','눈부엉이':'owl','햇살새':'sunbird'};
+const unitFrames=Object.fromEntries(Object.entries(unitAssetKeys).map(([name,key])=>[name,Array.from({length:8},(_,i)=>{const img=new Image();img.src='/units/'+key+'_'+String(i+1).padStart(2,'0')+'.png?v=12';return img;})]));
+function drawUnitIllustration(name,x,y,t,scale=1){
+ const frames=unitFrames[name];if(!frames)return;
+ const elapsed=t-attackAnim;
+ const frame=(elapsed>=0&&elapsed<490)?Math.min(7,Math.floor(elapsed/61.25)):0;
+ const img=frames[frame]?.complete&&frames[frame]?.naturalWidth?frames[frame]:frames[0];
+ if(!img?.complete||!img.naturalWidth)return;
+ ctx.save();ctx.translate(x,y+Math.sin(t/260+x)*3);
+ const attacking=frame>0&&frame<7;
+ if(attacking)ctx.translate(Math.sin(frame/7*Math.PI)*10,0);
+ ctx.drawImage(img,-46*scale,-108*scale,92*scale,108*scale);
+ ctx.restore();
+}
+
 function scene(t){
  const w=960,h=450;
  if(forestReady){ctx.drawImage(forestBackground,0,0,w,h)}else{const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#65c5ad');g.addColorStop(1,'#1a4b6c');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
  // Separate animated character assets, not static characters baked into the illustration.
 
  const attacking=performance.now()-attackAnim<230;
- drawSprite('healer',130,260,.86,t,2);
- drawSprite('mage',280,350,1.05,t,1);
+ // Show only equipped allies and pet, using the current account's saved formation.
+ const party=(state?.party||[]).slice(0,2);
+ party.forEach((name,i)=>drawUnitIllustration(name,i===0?185:310,350,t,1.25));
  drawLeoIllustration(455,367,t);
- drawSprite('swordswoman',575,338,.72,t,3);
+ if(state?.pet)drawUnitIllustration(state.pet,595,358,t,.9);
  if(enemy){ctx.save();ctx.translate(775,300+Math.sin(t/240)*8);ctx.fillStyle=enemy.boss?'#c679dd':'#83df80';ctx.beginPath();ctx.moveTo(-83,39);ctx.bezierCurveTo(-95,-45,-45,-98,0,-77);ctx.bezierCurveTo(59,-113,99,-34,81,39);ctx.quadraticCurveTo(0,99,-83,39);ctx.fill();ctx.strokeStyle='#3b6951';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#1c3b42';ctx.beginPath();ctx.ellipse(-25,-5,7,10,0,0,Math.PI*2);ctx.ellipse(25,-5,7,10,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(0,15,13,0,Math.PI);ctx.stroke();ctx.restore()}
  const since=performance.now()-attackAnim;if(since<270){ctx.save();ctx.globalAlpha=1-since/270;ctx.strokeStyle='#fff7ae';ctx.shadowColor='#ffe15d';ctx.shadowBlur=30;ctx.lineWidth=12;ctx.beginPath();ctx.arc(620,250,145,-1.1,.55);ctx.stroke();ctx.strokeStyle='#b9faff';ctx.lineWidth=4;ctx.stroke();ctx.restore()}
  if(enemy?.boss){ctx.font='bold 24px system-ui';ctx.fillStyle='#ffdf91';ctx.textAlign='center';ctx.fillText('⚠ BOSS',777,95)}
