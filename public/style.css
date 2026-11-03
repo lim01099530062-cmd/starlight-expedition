@@ -59,3 +59,40 @@ button.ghost{background:linear-gradient(#33465b,#203249);border-color:#74869b;co
 
 /* v6.2: authenticated view must never show the login layer */
 #auth[hidden],#app[hidden],[hidden]{display:none!important;visibility:hidden!important}
+
+/* v7 unified interactive login: the approved illustration is the full-screen
+   environment, not a separate banner; real controls cover its baked-in mock UI. */
+#auth.auth:not([hidden]){
+ display:flex!important; flex-direction:column; justify-content:center; align-items:center;
+ position:relative; isolation:isolate; min-height:100svh; padding:clamp(16px,4vh,44px) 16px;
+ overflow:hidden; background:#101b35!important;
+}
+#auth .login-art{
+ position:absolute!important; z-index:-1; inset:0; width:100%!important;
+ max-width:none!important; height:100%!important; margin:0!important;
+ overflow:hidden; pointer-events:none;
+}
+#auth .login-art img{
+ display:block; width:100%!important; height:100%!important;
+ object-fit:cover!important; object-position:center center!important;
+ filter:brightness(.78) saturate(1.06);
+}
+#auth .auth-card{
+ position:relative; z-index:2; width:min(440px,92vw)!important;
+ max-width:440px!important; min-height:0!important; flex:none!important;
+ margin:clamp(36px,10vh,110px) auto 0!important;
+ padding:clamp(19px,4vw,30px)!important;
+ background:linear-gradient(150deg,#101d43fa,#101a38fa)!important;
+ border:2px solid #e9bd71!important; border-radius:21px!important;
+ box-shadow:0 14px 55px #030819d9,0 0 0 7px #061a3b50!important;
+}
+#auth .auth-card h1{font-size:clamp(22px,4vw,29px)!important;color:#ffe0a0}
+#auth .auth-card input{font-size:16px!important;min-height:49px!important;background:#07132edb!important}
+#auth .auth-card button{font-size:clamp(13px,3vw,16px);min-height:48px}
+#auth .auth-card .hint{font-size:11px!important}
+#auth[hidden],#app[hidden],[hidden]{display:none!important;visibility:hidden!important}
+@media(max-width:760px){
+ #auth.auth:not([hidden]){justify-content:center;padding:16px 12px;}
+ #auth .login-art img{object-position:50% center!important}
+ #auth .auth-card{margin:clamp(58px,13vh,140px) auto 0!important;}
+}
