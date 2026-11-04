@@ -128,7 +128,7 @@ const unitSpriteSheets=Object.create(null);
 function getUnitSpriteSheet(name){
  if(!unitSpriteKeys[name])return null;
  if(!unitSpriteSheets[name]){
-   const img=new Image();img.src='/unit_anim/'+unitSpriteKeys[name]+'.png?v=14';
+   const img=new Image();img.src='/unit_anim/'+unitSpriteKeys[name]+'.png?v=15';
    unitSpriteSheets[name]=img;
  }
  return unitSpriteSheets[name];
@@ -184,7 +184,7 @@ function drawUnitIllustration(name,x,y,t,scale=1){
  if(sheet?.complete&&sheet.naturalWidth>=1536&&sheet.naturalHeight>=1152){
    ctx.imageSmoothingEnabled=true;
    ctx.imageSmoothingQuality='high';
-   ctx.drawImage(sheet,action.frame*192,action.row*192,192,192,-size/2,-size*169/192,size,size);
+   ctx.drawImage(sheet,action.frame*192,action.row*192,192,192,-size*0.48,-size*0.84,size*0.96,size*0.96);
  }else{
    // Safe fallback when a sprite sheet has not finished loading.
    const portrait=unitPortraits[name];

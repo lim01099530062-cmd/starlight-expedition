@@ -12,7 +12,7 @@ select{background:#263e54;color:#fff;border:1px solid #b9a16a;border-radius:10px
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
 .card{border:1px solid #a18b55;border-radius:14px;background:linear-gradient(#1d354c,#0d2033);padding:9px;text-align:center}
 .card b{font-size:16px;display:block;margin-top:4px}.card small{color:#9bbcd0}
-canvas{width:100%;max-width:180px;aspect-ratio:1;display:block;margin:auto;image-rendering:auto}
+canvas{width:100%;max-width:220px;aspect-ratio:1;display:block;margin:auto;image-rendering:auto}
 .foot{margin-top:25px;font-size:13px;opacity:.75}
 </style>
 </head><body>
@@ -35,7 +35,7 @@ const cards=units.map(([key,name,role])=>{
  const label=document.createElement('b');label.textContent=name;
  const small=document.createElement('small');small.textContent=role;
  card.append(canvas,label,small);grid.append(card);
- const img=new Image();img.src='/unit_anim/'+key+'.png?v=14';img.onload=()=>{loaded++;status.textContent=loaded+'/12개 로딩 완료';};img.onerror=()=>{small.textContent='이미지 로드 실패';};
+ const img=new Image();img.src='/unit_anim/'+key+'.png?v=15';img.onload=()=>{loaded++;status.textContent=loaded+'/12개 로딩 완료';};img.onerror=()=>{small.textContent='이미지 로드 실패';};
  return {img,ctx:canvas.getContext('2d')};
 });
 function loop(now){
@@ -44,7 +44,7 @@ function loop(now){
   ctx.clearRect(0,0,192,192);
   if(!img.complete||!img.naturalWidth)return;
   const frame=Math.floor((now-start+idx*45)/(1000/fps))%8;
-  ctx.drawImage(img,frame*192,row*192,192,192,0,0,192,192);
+  ctx.clearRect(0,0,192,192);ctx.drawImage(img,frame*192,row*192,192,192,0,0,192,192);
  });
  requestAnimationFrame(loop);
 }
