@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>별빛 원정대 v14 | 동료·펫 개별 애니메이션 미리보기</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,'Noto Sans KR',sans-serif;background:#0b1726;color:#fff1ca}
+*{box-sizing:border-box}body{max-width:1100px;margin:0 auto;padding:20px 14px 60px}
+h1{font-size:clamp(22px,4vw,32px);margin:5px 0 4px}p{color:#b4c8dd;line-height:1.6}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px;border:1px solid #596478;border-radius:14px;background:#16283c;position:sticky;top:0;z-index:2}
+select{background:#263e54;color:#fff;border:1px solid #b9a16a;border-radius:10px;padding:10px 12px;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
+.card{border:1px solid #a18b55;border-radius:14px;background:linear-gradient(#1d354c,#0d2033);padding:9px;text-align:center}
+.card b{font-size:16px;display:block;margin-top:4px}.card small{color:#9bbcd0}
+canvas{width:100%;max-width:180px;aspect-ratio:1;display:block;margin:auto;image-rendering:auto}
+.foot{margin-top:25px;font-size:13px;opacity:.75}
+</style>
+</head><body>
+<h1>✦ 작은 용사의 숲: 별빛 원정대</h1>
+<p>v14 동료 6명·펫 6종 — 각 캐릭터 6가지 동작, 8프레임씩 확인할 수 있습니다.</p>
+<div class="controls"><label for="mode">동작 선택</label><select id="mode">
+<option value="0">대기</option><option value="5">이동</option><option value="1">공격</option>
+<option value="2">스킬</option><option value="3">피격</option><option value="4">사망</option></select>
+<span id="status">12개 애니메이션 로딩 중…</span></div>
+<div class="grid" id="grid"></div>
+<p class="foot">그림 1장을 단순히 흔드는 방식이 아닌, 각 캐릭터별 프레임 PNG 시트를 재생합니다. 단, 원화가 새로 그려진 레오의 모션과는 제작 방식이 다릅니다.</p>
+<script>
+const units=[['luna','루나','치유'],['kain','카인','공격'],['mia','미아','공격'],['elin','엘린','보호'],['sol','솔','공격'],['noah','노아','치유'],['rabbit','별토끼','회복'],['dragon','작은 용','공격'],['fox','숲여우','골드'],['mooncat','달고양이','공격'],['owl','눈부엉이','회복'],['sunbird','햇살새','골드']];
+const grid=document.getElementById('grid'),mode=document.getElementById('mode'),status=document.getElementById('status');
+let start=performance.now(),loaded=0;
+mode.addEventListener('change',()=>start=performance.now());
+const cards=units.map(([key,name,role])=>{
+ const card=document.createElement('div');card.className='card';
+ const canvas=document.createElement('canvas');canvas.width=192;canvas.height=192;
+ const label=document.createElement('b');label.textContent=name;
+ const small=document.createElement('small');small.textContent=role;
+ card.append(canvas,label,small);grid.append(card);
+ const img=new Image();img.src='/unit_anim/'+key+'.png?v=14';img.onload=()=>{loaded++;status.textContent=loaded+'/12개 로딩 완료';};img.onerror=()=>{small.textContent='이미지 로드 실패';};
+ return {img,ctx:canvas.getContext('2d')};
+});
+function loop(now){
+ const row=Number(mode.value),fps=row===0?8:row===3?10:row===4?6:12;
+ cards.forEach(({ctx,img},idx)=>{
+  ctx.clearRect(0,0,192,192);
+  if(!img.complete||!img.naturalWidth)return;
+  const frame=Math.floor((now-start+idx*45)/(1000/fps))%8;
+  ctx.drawImage(img,frame*192,row*192,192,192,0,0,192,192);
+ });
+ requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script></body></html>
