@@ -116,22 +116,102 @@ function drawLeoIllustration(x,y,t){
 }
 
 
-// v12: illustration-frame animation for owned, equipped companions and pets.
-const unitAssetKeys={'루나':'luna','카인':'kain','미아':'mia','엘린':'elin','솔':'sol','노아':'noah','별토끼':'rabbit','작은 용':'dragon','숲여우':'fox','달고양이':'mooncat','눈부엉이':'owl','햇살새':'sunbird'};
-const unitFrames=Object.fromEntries(Object.entries(unitAssetKeys).map(([name,key])=>[name,Array.from({length:8},(_,i)=>{const img=new Image();img.src='/unit/'+key+'_'+String(i+1).padStart(2,'0')+'.png?v=12';return img;})]));
-function drawUnitIllustration(name,x,y,t,scale=1){
- const frames=unitFrames[name];if(!frames)return;
- const elapsed=t-attackAnim;
- const frame=(elapsed>=0&&elapsed<490)?Math.min(7,Math.floor(elapsed/61.25)):0;
- const img=frames[frame]?.complete&&frames[frame]?.naturalWidth?frames[frame]:frames[0];
- if(!img?.complete||!img.naturalWidth)return;
- ctx.save();ctx.translate(x,y+Math.sin(t/260+x)*3);
- const attacking=frame>0&&frame<7;
- if(attacking)ctx.translate(Math.sin(frame/7*Math.PI)*10,0);
- ctx.drawImage(img,-46*scale,-108*scale,92*scale,108*scale);
+
+// v13: high-quality portrait-based companion and pet rendering.
+const unitPortraitKeys={'루나':'luna','카인':'kain','미아':'mia','엘린':'elin','솔':'sol','노아':'noah','별토끼':'rabbit','작은 용':'dragon','숲여우':'fox','달고양이':'mooncat','눈부엉이':'owl','햇살새':'sunbird'};
+const unitPortraits=Object.fromEntries(Object.entries(unitPortraitKeys).map(([name,key])=>{const img=new Image();img.src='/unit_hd/'+key+'.png?v=13';return [name,img];}));
+const unitThemes={
+ '루나':{effect:'arcane',color:'#b26cff',glow:'rgba(191,143,255,.85)'},
+ '카인':{effect:'slash-gold',color:'#ffd36b',glow:'rgba(255,217,116,.85)'},
+ '미아':{effect:'arrow',color:'#68ff93',glow:'rgba(124,255,182,.82)'},
+ '엘린':{effect:'holy',color:'#ffe08b',glow:'rgba(255,234,153,.88)'},
+ '솔':{effect:'slash-blue',color:'#54c9ff',glow:'rgba(111,212,255,.88)'},
+ '노아':{effect:'slash-red',color:'#ff6161',glow:'rgba(255,110,110,.86)'},
+ '별토끼':{effect:'star',color:'#ffd36a',glow:'rgba(255,229,146,.85)'},
+ '작은 용':{effect:'fireball',color:'#ff8838',glow:'rgba(255,150,84,.88)'},
+ '숲여우':{effect:'wind',color:'#79ff90',glow:'rgba(159,255,174,.85)'},
+ '달고양이':{effect:'moon',color:'#bf8cff',glow:'rgba(216,186,255,.86)'},
+ '눈부엉이':{effect:'ice',color:'#8fe6ff',glow:'rgba(162,238,255,.9)'},
+ '햇살새':{effect:'sun',color:'#ffca52',glow:'rgba(255,216,123,.9)'}
+};
+function drawUnitEffect(effect,p,color){
+ const a=Math.sin(Math.PI*Math.max(0,Math.min(1,p)));
+ if(a<=0)return;
+ ctx.save();
+ ctx.globalAlpha=.18+.82*a;
+ ctx.lineCap='round';
+ ctx.lineJoin='round';
+ ctx.shadowColor=color;ctx.shadowBlur=20+20*a;
+ switch(effect){
+  case 'arcane':{
+   ctx.strokeStyle=color;ctx.lineWidth=7;
+   ctx.beginPath();ctx.arc(38,-54,18+30*a,-.4,1.8);ctx.stroke();
+   ctx.lineWidth=4;ctx.beginPath();ctx.arc(38,-54,10+17*a,0,Math.PI*2);ctx.stroke();
+   ctx.fillStyle='rgba(255,255,255,.88)';circle(54+20*a,-55,6+7*a,'rgba(255,255,255,.9)');
+  }break;
+  case 'slash-gold':
+  case 'slash-blue':
+  case 'slash-red':{
+   ctx.strokeStyle=color;ctx.lineWidth=10;
+   ctx.beginPath();ctx.arc(24,-48,26+34*a,-1.05,.78);ctx.stroke();
+   ctx.lineWidth=4;ctx.strokeStyle='rgba(255,255,255,.95)';
+   ctx.beginPath();ctx.arc(24,-48,34+42*a,-1.08,.82);ctx.stroke();
+  }break;
+  case 'arrow':{
+   ctx.strokeStyle=color;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(5,-52);ctx.lineTo(80+44*a,-60);ctx.stroke();
+   ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(90+44*a,-60);ctx.lineTo(66+44*a,-72);ctx.lineTo(70+44*a,-48);ctx.closePath();ctx.fill();
+  }break;
+  case 'holy':{
+   for(let i=0;i<3;i++){const ox=18+i*18;ctx.strokeStyle=color;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(ox,-18);ctx.lineTo(ox,-74-24*a);ctx.stroke();ctx.beginPath();ctx.moveTo(ox-7,-56-18*a);ctx.lineTo(ox+7,-56-18*a);ctx.stroke()}
+   circle(42,-84-10*a,6+8*a,'rgba(255,247,187,.95)');
+  }break;
+  case 'star':{
+   for(let i=0;i<5;i++){const ang=i*Math.PI*2/5+Math.PI*p;const sx=28+Math.cos(ang)*(18+14*a), sy=-55+Math.sin(ang)*(14+10*a);circle(sx,sy,4+2*a,color)}
+   circle(56+30*a,-48,10+8*a,'rgba(255,245,190,.95)');
+  }break;
+  case 'fireball':{
+   ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(55+40*a,-54,18+18*a,12+10*a,0,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='rgba(255,240,180,.95)';ctx.beginPath();ctx.ellipse(60+42*a,-54,7+8*a,5+5*a,0,0,Math.PI*2);ctx.fill();
+  }break;
+  case 'wind':{
+   ctx.strokeStyle=color;ctx.lineWidth=7;ctx.beginPath();ctx.arc(30,-52,18+16*a,.4,Math.PI*2-.4);ctx.stroke();ctx.beginPath();ctx.arc(54,-52,22+18*a,-2.6,.2);ctx.stroke();
+  }break;
+  case 'moon':{
+   ctx.fillStyle=color;ctx.beginPath();ctx.arc(52,-50,18+10*a,0,Math.PI*2);ctx.fill();ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(60,-50,14+9*a,0,Math.PI*2);ctx.fill();ctx.globalCompositeOperation='source-over';
+   circle(70+20*a,-45,5+5*a,'rgba(255,255,255,.92)');
+  }break;
+  case 'ice':{
+   ctx.strokeStyle=color;ctx.lineWidth=4;
+   for(let i=0;i<3;i++){const ox=22+i*16;ctx.beginPath();ctx.moveTo(ox,-22);ctx.lineTo(ox,-74-18*a);ctx.stroke();ctx.beginPath();ctx.moveTo(ox,-50);ctx.lineTo(ox-7,-36);ctx.moveTo(ox,-50);ctx.lineTo(ox+7,-36);ctx.stroke()}
+  }break;
+  case 'sun':{
+   circle(56+16*a,-52,12+10*a,'rgba(255,222,132,.96)');
+   ctx.strokeStyle=color;ctx.lineWidth=4;for(let i=0;i<8;i++){const ang=i*Math.PI/4;ctx.beginPath();ctx.moveTo(56+16*a+Math.cos(ang)*(18+8*a),-52+Math.sin(ang)*(18+8*a));ctx.lineTo(56+16*a+Math.cos(ang)*(29+16*a),-52+Math.sin(ang)*(29+16*a));ctx.stroke()}
+  }break;
+ }
  ctx.restore();
 }
-
+function drawUnitIllustration(name,x,y,t,scale=1){
+ const img=unitPortraits[name], theme=unitThemes[name]||{effect:'star',color:'#ffffff',glow:'rgba(255,255,255,.75)'};
+ const elapsed=t-attackAnim;
+ const active=elapsed>=0&&elapsed<420;
+ const p=active?elapsed/420:0;
+ const bob=Math.sin((t+x*1.4)/260)*3;
+ const dash=active?Math.sin(Math.PI*p)*16:0;
+ const lift=active?-Math.sin(Math.PI*p)*6:0;
+ const tilt=active?(Math.sin(Math.PI*p)*.08):Math.sin((t+x)/430)*.015;
+ const breathe=1+Math.sin((t+x)/510)*.025;
+ ctx.save();
+ ctx.translate(x+dash,y+bob+lift);ctx.rotate(tilt);ctx.scale(scale*breathe,scale*breathe);
+ ctx.fillStyle='rgba(16,29,44,.24)';ctx.beginPath();ctx.ellipse(0,2,34,7,0,0,Math.PI*2);ctx.fill();
+ if(img?.complete&&img.naturalWidth){
+  ctx.save();ctx.shadowColor=theme.glow;ctx.shadowBlur=active?22:10;ctx.drawImage(img,-62,-92,124,124);ctx.restore();
+ }else{
+  ctx.fillStyle='rgba(255,255,255,.2)';ctx.beginPath();ctx.arc(0,-40,24,0,Math.PI*2);ctx.fill();
+ }
+ if(active)drawUnitEffect(theme.effect,p,theme.color);
+ ctx.restore();
+}
 function scene(t){
  const w=960,h=450;
  if(forestReady){ctx.drawImage(forestBackground,0,0,w,h)}else{const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#65c5ad');g.addColorStop(1,'#1a4b6c');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
@@ -140,9 +220,9 @@ function scene(t){
  const attacking=performance.now()-attackAnim<230;
  // Show only equipped allies and pet, using the current account's saved formation.
  const party=(state?.party||[]).slice(0,2);
- party.forEach((name,i)=>drawUnitIllustration(name,i===0?185:310,350,t,1.25));
+ party.forEach((name,i)=>drawUnitIllustration(name,i===0?198:322,350,t,i===0?1.18:1.15));
  drawLeoIllustration(455,367,t);
- if(state?.pet)drawUnitIllustration(state.pet,595,358,t,.9);
+ if(state?.pet)drawUnitIllustration(state.pet,606,360,t,1.02);
  if(enemy){ctx.save();ctx.translate(775,300+Math.sin(t/240)*8);ctx.fillStyle=enemy.boss?'#c679dd':'#83df80';ctx.beginPath();ctx.moveTo(-83,39);ctx.bezierCurveTo(-95,-45,-45,-98,0,-77);ctx.bezierCurveTo(59,-113,99,-34,81,39);ctx.quadraticCurveTo(0,99,-83,39);ctx.fill();ctx.strokeStyle='#3b6951';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#1c3b42';ctx.beginPath();ctx.ellipse(-25,-5,7,10,0,0,Math.PI*2);ctx.ellipse(25,-5,7,10,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(0,15,13,0,Math.PI);ctx.stroke();ctx.restore()}
  const since=performance.now()-attackAnim;if(since<270){ctx.save();ctx.globalAlpha=1-since/270;ctx.strokeStyle='#fff7ae';ctx.shadowColor='#ffe15d';ctx.shadowBlur=30;ctx.lineWidth=12;ctx.beginPath();ctx.arc(620,250,145,-1.1,.55);ctx.stroke();ctx.strokeStyle='#b9faff';ctx.lineWidth=4;ctx.stroke();ctx.restore()}
  if(enemy?.boss){ctx.font='bold 24px system-ui';ctx.fillStyle='#ffdf91';ctx.textAlign='center';ctx.fillText('⚠ BOSS',777,95)}
