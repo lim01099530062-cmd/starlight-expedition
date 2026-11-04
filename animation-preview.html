@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>별빛 원정대 v16 - 개별 8장 모션 테스트</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Malgun Gothic",sans-serif;background:#091626;color:#fff}
+*{box-sizing:border-box}body{max-width:1250px;margin:auto;padding:16px}
+h1{font-size:clamp(22px,4vw,30px);color:#f7df9f}p{color:#adbfce}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px;background:#152c44;border:1px solid #aa9655;border-radius:12px}
+button,select{color:#ffdfa0;background:#1b344e;border:1px solid #b69953;padding:9px;border-radius:8px;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:18px}
+.item{border:1px solid #b19b63;border-radius:14px;background:linear-gradient(#19334c,#0b2031);padding:10px;text-align:center}
+canvas{display:block;width:100%;aspect-ratio:1;max-width:240px;margin:auto;image-rendering:auto}
+.item b{display:block;font-size:16px}.item small{color:#adc0d3}
+</style></head><body>
+<h1>✦ 작은 용사의 숲 · 별빛 원정대 v16</h1>
+<p>12종 캐릭터별 독립 PNG 8장을 빠르게 재생합니다. 8번째 장면도 전신 캐릭터가 유지됩니다.</p>
+<div class="toolbar">
+ <label>재생 속도 <select id="speed"><option value="65">빠르게 (65ms)</option><option value="90">보통 (90ms)</option><option value="120">천천히 (120ms)</option></select></label>
+ <button id="pause">일시정지</button><button id="reset">처음부터</button><span id="status">불러오는 중…</span>
+</div>
+<div id="grid" class="grid"></div>
+<script>
+const units=[["luna", "루나", "치유"], ["kain", "카인", "공격"], ["mia", "미아", "공격"], ["elin", "엘린", "보호"], ["sol", "솔", "공격"], ["noah", "노아", "치유"], ["rabbit", "별토끼", "회복"], ["dragon", "작은 용", "공격"], ["fox", "숲여우", "골드"], ["mooncat", "달고양이", "공격"], ["owl", "눈부엉이", "회복"], ["sunbird", "햇살새", "골드"]];
+const cards=[];const grid=document.querySelector('#grid');let stopped=false,start=performance.now(),ready=0;
+for(const [slug,name,role] of units){
+ const div=document.createElement('div');div.className='item';
+ const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;
+ const b=document.createElement('b');b.textContent=name;
+ const small=document.createElement('small');small.textContent=role;
+ div.append(canvas,b,small);grid.append(div);
+ const images=Array.from({length:8},(_,i)=>{
+  const im=new Image();im.onload=()=>{ready++;document.querySelector('#status').textContent=ready+'/96장 준비';};
+  im.onerror=()=>{small.textContent='이미지 로딩 실패';};
+  im.src='/unit/'+slug+'_'+String(i+1).padStart(2,'0')+'.png?v=16';return im;
+ });
+ cards.push({ctx:canvas.getContext('2d'),images});
+}
+let stoppedAt=0;
+document.querySelector('#pause').onclick=()=>{stopped=!stopped; if(stopped){stoppedAt=performance.now();}else{start+=performance.now()-stoppedAt;}document.querySelector('#pause').textContent=stopped?'계속 재생':'일시정지';};
+document.querySelector('#reset').onclick=()=>{start=performance.now();};
+document.querySelector('#speed').onchange=()=>start=performance.now();
+function tick(now){
+ const ms=Number(document.querySelector('#speed').value);
+ const frame=Math.floor(((stopped?stoppedAt:now)-start)/ms)%8;
+ for(const {ctx,images} of cards){ctx.clearRect(0,0,256,256);const img=images[Math.max(0,frame)];if(img?.complete&&img.naturalWidth)ctx.drawImage(img,0,0);}
+ requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script></body></html>
